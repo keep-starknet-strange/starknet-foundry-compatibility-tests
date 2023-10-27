@@ -1,5 +1,5 @@
-name: 'DO NOT USE - madara'
-description: 'testing'
+name: 'Madara Starknet Foundry Cast compatibility'
+description: 'Integration testing of Madara and Cast compatibility'
 runs:
   using: "composite"
   steps:
