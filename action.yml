@@ -24,6 +24,11 @@ runs:
       shell: bash
       run: |
         ./target/release/madara --dev & sleep 5
+    - name: "Clone source"
+      shell: bash
+      run: |
+        git clone https://github.com/justinfrevert/madara-foundry-action
+        cd madara-foundry-action/
     - name: "Declare Contract"
       shell: bash
       run: |
