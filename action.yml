@@ -1,0 +1,83 @@
+name: 'DO NOT USE - madara'
+description: 'testing'
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: target/release/madara
+        key:
+          ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}-${{
+          github.run_id }}
+        fail-on-cache-miss: true
+    - name: "Install Scarb and Starknet-Foundry"
+      shell: bash
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh
+        curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh  -s -- -v ${{ env.SNCAST_VERSION }}
+    - name: "Set up Madara"
+      shell: bash
+      run: |
+        ./target/release/madara setup --from-remote --chain dev
+    - name: "Start Madara"
+      shell: bash
+      run: |
+        ./target/release/madara --dev & sleep 5
+    - name: "Declare Contract"
+      shell: bash
+      run: |
+        # Declare contract and get output
+        DECLARE_OUTPUT=$(sncast --json declare --contract-name HelloStarknetFoundry --max-fee=14530)
+
+        CLASS_HASH=$(echo "$DECLARE_OUTPUT" | jq -r '.class_hash')
+        DECLARE_TX_HASH=$(echo "$DECLARE_OUTPUT" | jq -r '.transaction_hash')
+
+        # Wait for transaction hash to be ready
+        sleep 7
+
+        # Check that transaction for declare tx hash is okay
+        ./transaction_receipt.sh $DECLARE_TX_HASH
+
+        # Ensure class hash is available for next step
+        echo "CLASS_HASH=$CLASS_HASH" >> $GITHUB_ENV
+    - name: "Deploy Contract"
+      shell: bash
+      run: |
+        CLASS_HASH=${{ env.CLASS_HASH }}
+        # Deploy contract and get output
+        DEPLOY_OUTPUT=$(sncast --json deploy --class-hash $CLASS_HASH --max-fee=12530)
+
+        # Get contract address and tx hash
+        CONTRACT_ADDRESS=$(echo "$DEPLOY_OUTPUT" | jq -r '.contract_address')
+        DEPLOY_TX_HASH=$(echo "$DEPLOY_OUTPUT" | jq -r '.transaction_hash')
+
+        sleep 7
+        # Check transaction for deploy tx hash is okay
+        ./transaction_receipt.sh $DEPLOY_TX_HASH
+
+        # Ensure we can use contract address in next step
+        echo "CONTRACT_ADDRESS=$CONTRACT_ADDRESS" >> $GITHUB_ENV
+    - name: "Invoke Contract"
+      shell: bash
+      run: |
+        CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }}
+        # Invoke a function on the contract and get output
+        INVOKE_TX_HASH=$(sncast --json invoke --max-fee=30000 --contract-address $CONTRACT_ADDRESS --function increase_balance --calldata 500000 | jq '.transaction_hash' | tr -d '"')
+
+        # Wait for tx hash to be ready
+        sleep 7
+        ./transaction_receipt.sh $INVOKE_TX_HASH
+    - name: "Call Contract"
+      shell: bash
+      run: |
+        # Get the updated contract value
+        RESPONSE=$(sncast --json call --contract-address $CONTRACT_ADDRESS --function get_balance | jq '.response' | tr -d '"')          
+
+        # Value is now 500000
+        if [ "$RESPONSE" == "[0x7a120]" ]; then
+          echo "Response matches the expected value."
+        else
+          echo "Contract value could not be updated"
+        exit 1
+        fi

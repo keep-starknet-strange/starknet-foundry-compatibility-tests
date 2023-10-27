@@ -1,0 +1,16 @@
+[package]
+name = "hello_world"
+version = "0.1.0"
+
+[tool.sncast]
+account = "open-zeppelin"
+accounts-file = "accounts.json"
+url = "http://127.0.0.1:9944"
+
+[[target.starknet-contract]]
+sierra = true
+casm = true
+
+[dependencies]
+starknet = ">=2.2.0"
+alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "69e36b9db8bd7eae597d549dcb2c22d573f4829d" }
