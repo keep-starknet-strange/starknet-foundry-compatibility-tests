@@ -4,6 +4,11 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      # Get the source files for the custom action as well 
+    - uses: actions/checkout@v3
+      with:
+        repository: "justinfrevert/madara-foundry-action"
+        path: madara-foundry-action
     - uses: actions/cache@v3
       with:
         path: target/release/madara
@@ -24,13 +29,9 @@ runs:
       shell: bash
       run: |
         ./target/release/madara --dev & sleep 5
-    - name: "Clone source"
-      shell: bash
-      run: |
-        git clone https://github.com/justinfrevert/madara-foundry-action
-        cd madara-foundry-action/
     - name: "Declare Contract"
       shell: bash
+      working-directory: madara-foundry-action
       run: |
         # Declare contract and get output
         DECLARE_OUTPUT=$(sncast --json declare --contract-name HelloStarknetFoundry --max-fee=14530)
@@ -48,6 +49,7 @@ runs:
         echo "CLASS_HASH=$CLASS_HASH" >> $GITHUB_ENV
     - name: "Deploy Contract"
       shell: bash
+      working-directory: madara-foundry-action
       run: |
         CLASS_HASH=${{ env.CLASS_HASH }}
         # Deploy contract and get output
@@ -65,6 +67,7 @@ runs:
         echo "CONTRACT_ADDRESS=$CONTRACT_ADDRESS" >> $GITHUB_ENV
     - name: "Invoke Contract"
       shell: bash
+      working-directory: madara-foundry-action
       run: |
         CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }}
         # Invoke a function on the contract and get output
@@ -75,6 +78,7 @@ runs:
         ./transaction_receipt.sh $INVOKE_TX_HASH
     - name: "Call Contract"
       shell: bash
+      working-directory: madara-foundry-action
       run: |
         # Get the updated contract value
         RESPONSE=$(sncast --json call --contract-address $CONTRACT_ADDRESS --function get_balance | jq '.response' | tr -d '"')          
