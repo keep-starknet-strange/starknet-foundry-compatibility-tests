@@ -34,7 +34,7 @@ runs:
       working-directory: madara-foundry-action
       run: |
         # Declare contract and get output
-        DECLARE_OUTPUT=$(sncast --json declare --contract-name HelloStarknetFoundry --max-fee=14530)
+        DECLARE_OUTPUT=$($HOME/.local/bin/sncast --json declare --contract-name HelloStarknetFoundry --max-fee=14530)
 
         CLASS_HASH=$(echo "$DECLARE_OUTPUT" | jq -r '.class_hash')
         DECLARE_TX_HASH=$(echo "$DECLARE_OUTPUT" | jq -r '.transaction_hash')
@@ -53,7 +53,7 @@ runs:
       run: |
         CLASS_HASH=${{ env.CLASS_HASH }}
         # Deploy contract and get output
-        DEPLOY_OUTPUT=$(sncast --json deploy --class-hash $CLASS_HASH --max-fee=12530)
+        DEPLOY_OUTPUT=$($HOME/.local/bin/sncast --json deploy --class-hash $CLASS_HASH --max-fee=12530)
 
         # Get contract address and tx hash
         CONTRACT_ADDRESS=$(echo "$DEPLOY_OUTPUT" | jq -r '.contract_address')
@@ -71,7 +71,7 @@ runs:
       run: |
         CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }}
         # Invoke a function on the contract and get output
-        INVOKE_TX_HASH=$(sncast --json invoke --max-fee=30000 --contract-address $CONTRACT_ADDRESS --function increase_balance --calldata 500000 | jq '.transaction_hash' | tr -d '"')
+        INVOKE_TX_HASH=$($HOME/.local/bin/sncast --json invoke --max-fee=30000 --contract-address $CONTRACT_ADDRESS --function increase_balance --calldata 500000 | jq '.transaction_hash' | tr -d '"')
 
         # Wait for tx hash to be ready
         sleep 7
@@ -81,7 +81,7 @@ runs:
       working-directory: madara-foundry-action
       run: |
         # Get the updated contract value
-        RESPONSE=$(sncast --json call --contract-address $CONTRACT_ADDRESS --function get_balance | jq '.response' | tr -d '"')          
+        RESPONSE=$($HOME/.local/bin/sncast --json call --contract-address $CONTRACT_ADDRESS --function get_balance | jq '.response' | tr -d '"')          
 
         # Value is now 500000
         if [ "$RESPONSE" == "[0x7a120]" ]; then
