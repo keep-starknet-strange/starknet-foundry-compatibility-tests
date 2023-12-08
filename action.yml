@@ -18,8 +18,8 @@ runs:
     - name: "Install Scarb and Starknet-Foundry"
       shell: bash
       run: |
-        curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -- -v ${{ env.SCARB_VERSION }}
-        curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh  -s
+        curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v ${{ env.SCARB_VERSION }}
+        curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh
         snfoundryup -v ${{ env.SNCAST_VERSION }}
     - name: "Set up Madara"
       shell: bash
