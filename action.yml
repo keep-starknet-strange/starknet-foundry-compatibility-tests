@@ -1,10 +1,10 @@
-name: 'Madara Starknet Foundry Cast compatibility'
-description: 'Integration testing of Madara and Cast compatibility'
+name: "Madara Starknet Foundry Cast compatibility"
+description: "Integration testing of Madara and Cast compatibility"
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
-      # Get the source files for the custom action as well 
+      # Get the source files for the custom action as well
     - uses: actions/checkout@v3
       with:
         repository: "justinfrevert/madara-foundry-action"
@@ -12,16 +12,15 @@ runs:
     - uses: actions/cache@v3
       with:
         path: target/release/madara
-        key:
-          ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}-${{
+        key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}-${{
           github.run_id }}
         fail-on-cache-miss: true
     - name: "Install Scarb and Starknet-Foundry"
       shell: bash
       run: |
-        curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh
-        curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh  -s -- -v ${{ env.SNCAST_VERSION }}
-        snfoundryup
+        curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -- -v ${{ env.SCARB_VERSION }}
+        curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh  -s
+        snfoundryup -v ${{ env.SNCAST_VERSION }}
     - name: "Set up Madara"
       shell: bash
       run: |
