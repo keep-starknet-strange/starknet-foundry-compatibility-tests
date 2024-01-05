@@ -26,7 +26,7 @@ runs:
     - name: "Set up Madara"
       shell: bash
       run: |
-        ./target/release/madara setup --from-remote --chain dev
+        ./target/release/madara setup --from-local ./configs --chain dev
     - name: "Start Madara"
       shell: bash
       run: |
