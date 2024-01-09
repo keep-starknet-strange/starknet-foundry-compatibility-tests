@@ -13,7 +13,6 @@ runs:
       with:
         path: |
           target/release/madara
-          configs
         key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}-${{
           github.run_id }}
         fail-on-cache-miss: true
