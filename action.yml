@@ -12,7 +12,7 @@ runs:
     - uses: actions/cache@v3
       with:
         path: |
-          target/release/madara
+          target/production/madara
         key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}-${{
           github.run_id }}
         fail-on-cache-miss: true
@@ -25,11 +25,11 @@ runs:
     - name: "Set up Madara"
       shell: bash
       run: |
-        ./target/release/madara setup --from-local ./configs --chain dev
+        ./target/production/madara setup --from-local ./configs --chain dev
     - name: "Start Madara"
       shell: bash
       run: |
-        ./target/release/madara --dev & sleep 5
+        ./target/production/madara --dev & sleep 5
     - name: "Declare Contract"
       shell: bash
       working-directory: madara-foundry-action
